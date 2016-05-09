@@ -1,54 +1,85 @@
 \documentclass{article}
 \usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+
+\usepackage{geometry}
+\geometry{verbose,tmargin=3cm,bmargin=3cm,lmargin=3cm,rmargin=3cm}
+
+\usepackage{listings}
+\lstset{breaklines=true}
+
+\usepackage{fancyhdr}
+
 %% for inline R code: if the inline code is not correctly parsed, you will see a message
 \newcommand{\rinline}[1]{SOMETHING WRONG WITH knitr}
 %% begin.rcode setup, include=FALSE
 % library(knitr)
 % opts_chunk$set(fig.path='figure/latex-', cache.path='cache/latex-')
 %% end.rcode
+
 \begin{document}
 
-Boring stuff as usual:
-
-%% a chunk with default options
-%% begin.rcode
-% 1+1
-%
-% x=rnorm(5)
+%% begin.rcode bibdata, cache=FALSE, include=FALSE
+% source('bibliometRics.R')
+% quant <- read.table('quantiles_geosci_2015.csv',sep=';',head=TRUE)
+% bib <- read.isiwok('FILENAME')
+% x <- bibliometric(bib, quant)
+% publist <- apply(cbind(bib$pubs,rank(bib,q=quant)),1,format_pub,au=bib$au)
 %% end.rcode
 
-For the cached chunk below, you will need to wait for 10 seconds for
-the first time you compile this document, but it takes no time the
-next time you run it again.
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\rinline{bib$ref}}
+\lhead{\rinline{bib$au}}
+\rfoot{Page \thepage}
+\lfoot{\today}
 
-%% chunk options: cache this chunk
-%% begin.rcode my-cache, cache=TRUE
-% set.seed(123)
-% x = runif(10)
-% sd(x)  # standard deviation
-%
-% Sys.sleep(10) # test cache
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\title{\rinline{bib$au} \\ \vspace{2 mm} {\large \rinline{bib$ref}}}
+\date{}
+\maketitle
+
+%\section*{\rinline{bib$au}}
+
+% Tratamos de cuantificar: la cantidad (pubs, pubs_year), la calidad / impacto (pubs_lead, hndx, hndx_year, cit_tot, cit_year, cit_art, ifact2, ifact5), y las aportaciones singulares (i10, i25, i50, cit_max).
+
+
+\section*{Indicators}
+
+%% begin.rcode biblioplot, cairo-scatter, echo=FALSE, message=FALSE, warning=FALSE, dev='cairo_pdf', fig.width=12, fig.height=4, out.width='1.0\\textwidth'
+% biblioplot(bib)
 %% end.rcode
 
-Now we know the first element of x is \rinline{x[1]}. And we also know
-the 26 letters are \rinline{LETTERS}. An expression that returns a
-value of length 0 will be removed from the output, \rinline{x[1] =
-  2011; NULL} but it was indeed evaluated, e.g. now the first element
-of x becomes \rinline{x[1]}.
 
-How about figures? Let's use the Cairo PDF device (assumes R $\geq$
-2.14.0).
+%\section*{Table}
 
-%% begin.rcode cairo-scatter, dev='cairo_pdf', fig.width=5, fig.height=5, out.width='.8\\textwidth'
-% plot(cars) # a scatter plot
-%% end.rcode
+\begin{table}[h]
+\centering
+\begin{tabular}{llll}
+\hline
+Publications (total) & Pubs. (as lead author) & Years & Pubs. per year \\
+\rinline{x$pubs} & \rinline{x$lead} & \rinline{x$years} & \rinline{x$pubs_year} \\
+\hline
+Citations (total) & Citations per year & Citations per pub & Citations (highest pub) \\
+\rinline{x$cit_tot} & \rinline{x$cit_year} & \rinline{x$cit_art} & \rinline{x$cit_max} \\
+\hline
+h-index & h-index per year & g-index & g-index per year \\
+\rinline{x$hin} & \rinline{x$hin_year} & \rinline{x$gin} & \rinline{x$gin_year} \\
+\hline
+Pubs $>$q0.9 & Pubs $>$q0.9 (as lead) & i-score & i-score (as lead) \\
+\rinline{x$pubs09} & \rinline{x$pubs09_lead} & \rinline{x$iscore} & \rinline{x$iscore_lead} \\
+\hline
+\end{tabular}
+\end{table}
 
-Warnings, messages and errors are preserved by default.
 
-%% begin.rcode
-% sqrt(-1) # here is a warning!
-% message('this is a message you should know')
-% 1+'a'  # impossible
-%% end.rcode
+\section*{Publication list}
+
+\begin{enumerate}
+\rinline{publist}
+\end{enumerate}
+
 
 \end{document}
